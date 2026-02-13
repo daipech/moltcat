@@ -337,7 +337,7 @@ auto Executor::submit(Task::Func&& func) -> void {
 }
 
 auto Executor::submit_priority(Task::Func&& func, Task::Priority priority) -> void {
-    submit(Task(std::move(func), TaskType::PRIORITIZED, priority));
+    submit(Task(std::move(func), Task::TaskType::PRIORITIZED, priority));
 }
 
 auto Executor::submit_affinity(Task&& task, size_t thread_index) -> void {

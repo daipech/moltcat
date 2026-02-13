@@ -233,7 +233,7 @@ struct TaskComparator {
  * Routes to libuv thread pool in HybridExecutor.
  */
 [[nodiscard]] inline auto io_task(Task::Func&& f) noexcept -> Task {
-    return Task(std::move(f), TaskType::IO_BOUND);
+    return Task(std::move(f), Task::TaskType::IO_BOUND);
 }
 
 /**
@@ -242,7 +242,7 @@ struct TaskComparator {
  * Routes to libuv thread pool in HybridExecutor for quick computations.
  */
 [[nodiscard]] inline auto light_cpu_task(Task::Func&& f) noexcept -> Task {
-    return Task(std::move(f), TaskType::CPU_LIGHT);
+    return Task(std::move(f), Task::TaskType::CPU_LIGHT);
 }
 
 /**
@@ -251,7 +251,7 @@ struct TaskComparator {
  * Routes to CPU thread pool in HybridExecutor for intensive computations.
  */
 [[nodiscard]] inline auto cpu_task(Task::Func&& f) noexcept -> Task {
-    return Task(std::move(f), TaskType::CPU_HEAVY);
+    return Task(std::move(f), Task::TaskType::CPU_HEAVY);
 }
 
 /**
@@ -260,7 +260,7 @@ struct TaskComparator {
  * Routes to CPU thread pool in HybridExecutor with priority scheduling.
  */
 [[nodiscard]] inline auto prioritized_task(Task::Func&& f, Task::Priority p) noexcept -> Task {
-    return Task(std::move(f), TaskType::PRIORITIZED, p);
+    return Task(std::move(f), Task::TaskType::PRIORITIZED, p);
 }
 
 } // namespace moltcat::core

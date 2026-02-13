@@ -1,6 +1,10 @@
-# MoltCat
+<div align="center">
+
+# 🐱MoltCat
 
 Agent Collaboration Management Software - A high-performance multi-agent collaboration platform built with C++20.
+
+</div>
 
 ## Features
 

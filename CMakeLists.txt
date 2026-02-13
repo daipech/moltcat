@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(moltcat
     VERSION 0.1.0
     LANGUAGES CXX
-    DESCRIPTION "智能体协作管理软件"
+    DESCRIPTION "MoltCat Multi-Agent Management"
 )
 
 # ================================
