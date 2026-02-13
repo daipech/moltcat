@@ -1,0 +1,64 @@
+# Build artifacts
+build/
+build-*/
+out/
+cmake-build-*/
+*.cmake
+!CMakeLists.txt
+
+# vcpkg
+vcpkg_installed/
+vcpkg/.git
+
+# Compiled files
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.exe
+*.lib
+*.a
+*.pdb
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Claude Code
+.claude/
+CLAUDE.md
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+!cmake/*.cmake.in
+
+# C++ coverage
+*.gcda
+*.gcno
+*.gcov
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Plugin outputs (built locally)
+plugins/*.so
+plugins/*.dll
+plugins/*.dylib

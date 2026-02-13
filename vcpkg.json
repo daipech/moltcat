@@ -1,0 +1,48 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "moltcat",
+  "version": "0.1.0",
+  "description": "智能体协作管理软件",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "libuv",
+      "version>=": "1.46.0"
+    },
+    {
+      "name": "cpp-httplib",
+      "version>=": "0.15.0"
+    },
+    {
+      "name": "uwebsockets",
+      "version>=": "20.0.0"
+    },
+    {
+      "name": "glaze",
+      "version>=": "2.0.0"
+    },
+    {
+      "name": "yoga",
+      "version>=": "2.0.0"
+    },
+    {
+      "name": "fmt",
+      "version>=": "10.0.0"
+    },
+    {
+      "name": "spdlog",
+      "version>=": "1.12.0"
+    }
+  ],
+  "builtin-baseline": "8eb57355a4ffb410a2e94c07f4c24c95e4e784c6",
+  "overrides": [
+    {
+      "name": "vcpkg-cmake",
+      "version>=": "2024-02-01"
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "version>=": "2024-02-01"
+    }
+  ]
+}

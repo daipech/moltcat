@@ -1,0 +1,17 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# Find dependencies
+find_dependency(libuv CONFIG REQUIRED)
+find_dependency(httplib CONFIG REQUIRED)
+find_dependency(uWebSockets CONFIG REQUIRED)
+find_dependency(glaze CONFIG REQUIRED)
+find_dependency(yoga CONFIG REQUIRED)
+find_dependency(fmt CONFIG REQUIRED)
+find_dependency(spdlog CONFIG REQUIRED)
+
+# Include targets file
+include("${CMAKE_CURRENT_LIST_DIR}/moltcat_targets.cmake")
+
+check_required_components(moltcat)
