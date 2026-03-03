@@ -22,6 +22,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <future>
+#include <coroutine>
 
 namespace moltcat::core {
 

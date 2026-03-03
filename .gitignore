@@ -23,7 +23,9 @@ vcpkg/.git
 
 # IDE
 .vs/
-.vscode/
+.vscode/*.log
+.vscode/ipch/
+.vscode/.cmaketools.json
 .idea/
 *.swp
 *.swo

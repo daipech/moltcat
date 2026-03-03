@@ -1,4 +1,16 @@
 cmake_minimum_required(VERSION 3.20)
+
+# ================================
+# vcpkg support
+# ================================
+# To use vcpkg, set CMAKE_TOOLCHAIN_FILE before project():
+# cmake -DCMAKE_TOOLCHAIN_FILE=<vcpkg-root>/scripts/buildsystems/vcpkg.cmake ..
+# Or set VCPKG_ROOT environment variable and it will be auto-detected
+if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        CACHE STRING "Vcpkg toolchain file")
+endif()
+
 project(moltcat
     VERSION 0.1.0
     LANGUAGES CXX
@@ -6,13 +18,13 @@ project(moltcat
 )
 
 # ================================
-# C++20 配置
+# C++20 Configuration
 # ================================
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# 导出编译命令
+# Export compile commands
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # ================================
@@ -20,7 +32,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # ================================
 option(MOLTCAT_BUILD_TESTS "Build tests" ON)
 option(MOLTCAT_BUILD_EXAMPLES "Build examples" ON)
-option(MOLTCAT_ENABLE_TUI "Enable TUI interface" ON)
 option(MOLTCAT_ENABLE_SANITIZERS "Enable address/undefined behavior sanitizers" OFF)
 
 # ================================
@@ -28,16 +39,33 @@ option(MOLTCAT_ENABLE_SANITIZERS "Enable address/undefined behavior sanitizers" 
 # ================================
 find_package(libuv CONFIG REQUIRED)
 find_package(httplib CONFIG REQUIRED)
-find_package(uWebSockets CONFIG REQUIRED)
+find_package(unofficial-uwebsockets CONFIG REQUIRED)
 find_package(glaze CONFIG REQUIRED)
-find_package(yoga CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+find_package(ZeroMQ CONFIG REQUIRED)
+find_package(cppzmq CONFIG REQUIRED)
+find_package(unofficial-sodium CONFIG REQUIRED)
+find_package(unofficial-sqlite3 CONFIG REQUIRED)
 
 # ================================
-# Source file collection
+# Add module subdirectories (in dependency order)
+# ================================
+add_subdirectory(source/utils)
+add_subdirectory(source/model)
+add_subdirectory(source/protocol)
+add_subdirectory(source/network)
+add_subdirectory(source/monitoring)
+add_subdirectory(source/messaging)
+add_subdirectory(source/core)
+add_subdirectory(source/memory)
+add_subdirectory(source/provider)
+add_subdirectory(source/agent)
+add_subdirectory(source/gateway)
+
 # ================================
 # Public interface headers (for plugin developers)
+# ================================
 set(MOLTCAT_INTERFACE_HEADERS
     include/moltcat/molt_plugin.hpp
     include/moltcat/molt_model.hpp
@@ -45,124 +73,38 @@ set(MOLTCAT_INTERFACE_HEADERS
     include/moltcat/molt_export.hpp
 )
 
-# 内部源文件（按模块分组）
-set(MOLTCAT_AGENT_SOURCES)
-file(GLOB MOLTCAT_AGENT_SOURCES
-    "source/agent/*.cpp"
-    "source/agent/*.hpp"
-)
-
-set(MOLTCAT_MODEL_SOURCES)
-file(GLOB MOLTCAT_MODEL_SOURCES
-    "source/model/*.cpp"
-    "source/model/*.hpp"
-)
-
-set(MOLTCAT_SKILL_SOURCES)
-file(GLOB MOLTCAT_SKILL_SOURCES
-    "source/skill/*.cpp"
-    "source/skill/*.hpp"
-)
-
-set(MOLTCAT_GATEWAY_SOURCES)
-file(GLOB MOLTCAT_GATEWAY_SOURCES
-    "source/gateway/*.cpp"
-    "source/gateway/*.hpp"
-)
-
-set(MOLTCAT_ROUTER_SOURCES)
-file(GLOB MOLTCAT_ROUTER_SOURCES
-    "source/router/*.cpp"
-    "source/router/*.hpp"
-)
-
-set(MOLTCAT_WORKER_SOURCES)
-file(GLOB MOLTCAT_WORKER_SOURCES
-    "source/worker/*.cpp"
-    "source/worker/*.hpp"
-)
-
-set(MOLTCAT_TUI_SOURCES)
-file(GLOB MOLTCAT_TUI_SOURCES
-    "source/tui/*.cpp"
-    "source/tui/*.hpp"
-)
-
-set(MOLTCAT_CORE_SOURCES)
-file(GLOB MOLTCAT_CORE_SOURCES
-    "source/core/*.cpp"
-    "source/core/*.hpp"
-)
-
-set(MOLTCAT_NETWORK_SOURCES)
-file(GLOB MOLTCAT_NETWORK_SOURCES
-    "source/network/*.cpp"
-    "source/network/*.hpp"
-)
-
-set(MOLTCAT_STORAGE_SOURCES)
-file(GLOB MOLTCAT_STORAGE_SOURCES
-    "source/storage/*.cpp"
-    "source/storage/*.hpp"
-)
-
-set(MOLTCAT_UTILS_SOURCES)
-file(GLOB MOLTCAT_UTILS_SOURCES
-    "source/utils/*.cpp"
-    "source/utils/*.hpp"
-)
-
-# Merge all source files
-set(MOLTCAT_ALL_SOURCES
-    ${MOLTCAT_INTERFACE_HEADERS}
-    ${MOLTCAT_AGENT_SOURCES}
-    ${MOLTCAT_MODEL_SOURCES}
-    ${MOLTCAT_SKILL_SOURCES}
-    ${MOLTCAT_GATEWAY_SOURCES}
-    ${MOLTCAT_ROUTER_SOURCES}
-    ${MOLTCAT_WORKER_SOURCES}
-    ${MOLTCAT_CORE_SOURCES}
-    ${MOLTCAT_NETWORK_SOURCES}
-    ${MOLTCAT_STORAGE_SOURCES}
-    ${MOLTCAT_UTILS_SOURCES}
-)
-
-# Add TUI source files based on option
-if(MOLTCAT_ENABLE_TUI)
-    list(APPEND MOLTCAT_ALL_SOURCES ${MOLTCAT_TUI_SOURCES})
-endif()
-
 # ================================
-# Core library
+# Executable
 # ================================
-add_library(moltcat_core ${MOLTCAT_ALL_SOURCES})
+add_executable(moltcat source/main.cpp)
 
-target_include_directories(moltcat_core
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
+# Link all module libraries and dependencies
+target_link_libraries(moltcat
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/source
-)
-
-# Link dependency libraries
-target_link_libraries(moltcat_core
-    PUBLIC
-        uv::uv_a
+        moltcat_utils
+        moltcat_model
+        moltcat_protocol
+        moltcat_network
+        moltcat_monitoring
+        moltcat_messaging
+        moltcat_core
+        moltcat_memory
+        moltcat_provider
+        moltcat_agent
+        moltcat_gateway
+        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
         httplib::httplib
-        uWS::uWS
-        glaze::glaze
-        yoga::yoga
+        unofficial::uwebsockets::uwebsockets
         fmt::fmt
         spdlog::spdlog
 )
 
 # C++20 standard feature
-target_compile_features(moltcat_core PUBLIC cxx_std_20)
+target_compile_features(moltcat PUBLIC cxx_std_20)
 
 # Platform-specific settings
 if(WIN32)
-    target_compile_definitions(moltcat_core PRIVATE
+    target_compile_definitions(moltcat PRIVATE
         _WIN32_WINNT=0x0A00
         NOMINMAX
         _CRT_SECURE_NO_WARNINGS
@@ -173,19 +115,19 @@ endif()
 # Compiler options
 # ================================
 if(MSVC)
-    target_compile_options(moltcat_core PRIVATE
+    target_compile_options(moltcat PRIVATE
         /W4
         /WX
         /permissive-
         /Zc:__cplusplus
-        /Zc:externC-  # 严格的extern "C"规则
+        /Zc:externC-  # Strict extern "C" rules
     )
     # Enable sanitizers
     if(MOLTCAT_ENABLE_SANITIZERS)
         message(WARNING "MSVC does not support AddressSanitizer, use clang-cl or GCC")
     endif()
 else()
-    target_compile_options(moltcat_core PRIVATE
+    target_compile_options(moltcat PRIVATE
         -Wall
         -Wextra
         -Wpedantic
@@ -197,21 +139,15 @@ else()
     )
     # GCC/Clang sanitizers
     if(MOLTCAT_ENABLE_SANITIZERS)
-        target_compile_options(moltcat_core PUBLIC
+        target_compile_options(moltcat PUBLIC
             -fsanitize=address,undefined
             -fno-sanitize-recover=address,undefined
         )
-        target_link_options(moltcat_core PUBLIC
+        target_link_options(moltcat PUBLIC
             -fsanitize=address,undefined
         )
     endif()
 endif()
-
-# ================================
-# Executable
-# ================================
-add_executable(moltcat source/main.cpp)
-target_link_libraries(moltcat PRIVATE moltcat_core)
 
 # ================================
 # Tests
@@ -233,7 +169,7 @@ endif()
 # ================================
 include(GNUInstallDirs)
 
-install(TARGETS moltcat moltcat_core
+install(TARGETS moltcat
     EXPORT moltcat_targets
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
